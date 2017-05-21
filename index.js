@@ -30,7 +30,6 @@ var model={
 };
 
 var view={
-  //var catDiv, catName, catClickCount, catPicture, listCatName;
   init:function(){
     this.catDiv = document.getElementById('cat-div');
 
@@ -42,7 +41,6 @@ var view={
       controller.incrementCounter();
     });
     this.render();
-
   },
   render:function(){
     var currentCat = controller.getCurrentCat();
@@ -68,7 +66,7 @@ var listView={
         newCat.addEventListener('click', (function(catCopy){
           return function(){
             controller.setCurrentCat(catCopy);
-            view.render();//loophole - view to view communication
+            view.render();
             if(controller.isAdminVisible())
               adminView.render();
           };
@@ -78,12 +76,66 @@ var listView={
   }
 };
 
+var adminView={
+  init:function(){
+    this.formDivVisible = false;
+    this.formDiv = document.getElementById('form-div');
+    this.formDiv.style.display = 'none';
+    this.formCatName = document.getElementById('form-cat-name');
+    this.formCatImg = document.getElementById('form-cat-img');
+    this.formCatclicks = document.getElementById('form-cat-clicks');
+    this.formSubmitButton = document.getElementById('submit');
+
+    this.formSubmitButton.addEventListener('click', function(){
+        //Because the event handler method is in different scope than the adminView
+        var av = controller.getAdminView();
+        var updatedCat = {
+          catName:av.formCatName.value,
+          imagePath:av.formCatImg.value,
+          clickCount:av.formCatclicks.value
+        };
+        controller.updateCurrentCat(updatedCat);
+        av.cleanFormData();
+        controller.hideAdminDiv();
+        controller.toggleAdminVisiblilityVal();
+    });
+    this.render();
+  },
+  render:function(){
+    var currentCat = controller.getCurrentCat();
+    this.formCatName.value = currentCat.catName;
+    this.formCatImg.value = currentCat.imagePath;
+    this.formCatclicks.value = currentCat.clickCount;
+  },
+  cleanFormData:function(){
+    this.formCatName.value = "";
+    this.formCatImg.value = "";
+    this.formCatclicks.value = "";
+  }
+};
+
+var adminButtonView={
+  init:function(){
+    this.adminButton = document.getElementById('admin-button');
+    this.adminButton.addEventListener('click', function(){
+      if(controller.isAdminVisible()){
+        controller.hideAdminDiv();
+      } else{
+        controller.showAdminDiv();
+        adminView.render(); 
+      }
+      controller.toggleAdminVisiblilityVal();
+    });
+  }
+};
 
 var controller={
   init:function(){
     model.currentCat = model.catArray[0];
     view.init();
     listView.init();
+    adminView.init();
+    adminButtonView.init();
   },
   getCurrentCat:function(){
     return model.currentCat;
@@ -97,6 +149,9 @@ var controller={
   incrementCounter:function(){
     model.currentCat.clickCount++;
     view.render();
+    if(this.isAdminVisible()){
+      adminView.formCatclicks.value = this.getCurrentCat().clickCount;
+    }
   },
   getAllCats:function(){
     return model.catArray;
@@ -104,10 +159,31 @@ var controller={
   isAdminVisible:function(){
     return adminView.formDivVisible;
   },
+  toggleAdminVisiblilityVal:function(){
+    if(adminView.formDivVisible){
+      adminView.formDivVisible = false;
+      adminButtonView.adminButton.innerText = "Admin";
+    }else{
+      adminView.formDivVisible = true;
+      adminButtonView.adminButton.innerText = "Cancel";
+    }
+  },
+  getAdminDiv:function(){
+    return adminView.formDiv;
+  },
+  showAdminDiv:function(){
+    adminView.formDiv.style.display = 'block';
+  },
+  hideAdminDiv:function(){
+    adminView.formDiv.style.display = 'none';
+  },
   updateCurrentCat:function(catCopy){
     model.currentCat = catCopy;
     view.render();
   },
+  getAdminView:function(){
+    return adminView;
+  }
 };
 
 controller.init();
