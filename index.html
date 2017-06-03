@@ -4,11 +4,7 @@
   <script src='https://ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js'></script>
 </head>
 <body>
-  <ul id='list-cat-name' data-bind='foreach: catArray'>
-    <li data-bind='text: catName, click: $parent.updateCurrentCat'></li>
-  </ul>
-  &nbsp;
-  <div id ='cat-div' data-bind='with: currentCat'>
+    <div id ='cat-div' data-bind='with: currentCat'>
     <div id='cat-click-count' data-bind='text: clickCount'></div>
     <img id='cat-picture' data-bind="click: incrementCounter, attr:{src:imagePath}"></img>
     <div id='cat-name' data-bind='text: catName'></div>
