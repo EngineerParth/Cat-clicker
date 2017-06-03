@@ -11,7 +11,7 @@ function cat(copyCat){
 
 function viewModel(){
   var self = this;
-  this.catArray=ko.observableArray([
+  this.catArray = ko.observableArray([
     {
     catName:"Fiby",
     imagePath:"C:/Users/Parth/Study/CatClicker/images/cat-1.jpg",
@@ -38,10 +38,18 @@ function viewModel(){
     clickCount:0
     }
   ]);
+  this.searchCatData = function(previousCatName){
+    return ko.utils.arrayFirst(self.catArray(), function(catt){
+      return (previousCatName === catt.catName);
+    });
+  };
   this.currentCat = ko.observable(new cat(this.catArray()[0]));
   this.updateCurrentCat = function(clickedCat){
-    console.log("previous cat: "+ self.currentCat().catName());
-    //self.catArray()[self.catArray(currentCatName)].clickCount = self.currentCat().clickCount();
+    //Update current cat's click count in the model
+    var previousCatName = self.currentCat().catName();
+    var catInArray = self.searchCatData(previousCatName);
+    catInArray.clickCount = self.currentCat().clickCount();
+    //Update the current cat
     self.currentCat(new cat(clickedCat));
   }
 }
