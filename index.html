@@ -1,18 +1,36 @@
 <html>
 <head>
-
+  <title>Cat Clicker</title>
+  <!-- <script src='https://ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.2.js'></script> -->
+  <script src='../knockout-3.4.2.js'></script>
 </head>
 <body>
-  <ul id='list-cat-name'>
-    <div ></div>
+  <ul id='list-cat-name' data-bind='foreach: catArray'>
+    <li data-bind='text: catName, click: $parent.shuffleCurrentCat.bind($data, $index())'></li>
   </ul>
   &nbsp;
-  <div id ='cat-div'>
-    <div id='cat-click-count'></div>
-    <img id='cat-picture'></img>
-    <div id='cat-name'></div>
-  </div>
+  <div id ='cat-div' data-bind='with: currentCat'>
+    <div id='cat-click-count' data-bind='text: clickCount'></div>
+    <div><a id='reset-click-count' data-bind='click: resetClickCounter' href=''>reset</a></div>
+    <img id='cat-picture' data-bind="click: incrementCounter, attr:{src:imagePath}" style='width:259px;height:194px'></img>
+    <div id='cat-name' data-bind='text: catName'></div>
 
+  </div>
+  <div id = 'admin-div'>
+    <div>
+      <button id='admin-button' data-bind='click: toggleAdminView'>Admin</button>
+    </div>
+    <div id='form-div' data-bind='visible: isAdminVisible, with:currentCat'>
+      <!-- <form method='post'> -->
+        Name: <input type='text' id='form-cat-name' data-bind='value:catName'/><br/>
+        Image: <input type='text' id='form-cat-img' data-bind='value:imagePath'/><br/>
+        click Count: <input type='text' id='form-cat-clicks' data-bind='value:clickCount'/><br/>
+        <input type='submit' id='submit' value='save'/>
+      <!-- </form> -->
+    </div>
+
+  </div>
   <script src='./index.js'></script>
+
 </body>
 </html>

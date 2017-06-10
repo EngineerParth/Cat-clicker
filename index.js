@@ -1,113 +1,99 @@
-var model={
-  catArray:[
+//Using the MV* framework Knockout.js
+
+function cat(copyCat){
+  this.catName = ko.observable(copyCat.catName);
+  this.imagePath = ko.observable(copyCat.imagePath);
+  this.clickCount = ko.observable(copyCat.clickCount);
+  this.incrementCounter = function(){
+    this.clickCount(this.clickCount()+1);
+  };
+  this.resetClickCounter = function(){
+    this.clickCount(0);
+  }
+}
+
+function viewModel(){
+  var self = this;
+
+  // Collection of cats
+  this.catArray = ko.observableArray([
     {
     catName:"Fiby",
-    imagePath:"C:/Users/Parth/Study/CatClick/images/cat-1.jpg",
+    imagePath:"C:/Users/Parth/Study/CatClicker/images/cat-1.jpg",
     clickCount:0
     },
     {
     catName:"Lency",
-    imagePath:"C:/Users/Parth/Study/CatClick/images/cat-2.jpg",
+    imagePath:"C:/Users/Parth/Study/CatClicker/images/cat-2.jpg",
     clickCount:0
     },
     {
     catName:"Mini",
-    imagePath:"C:/Users/Parth/Study/CatClick/images/cat-3.jpg",
+    imagePath:"C:/Users/Parth/Study/CatClicker/images/cat-3.jpg",
     clickCount:0
     },
     {
     catName:"Rachel",
-    imagePath:"C:/Users/Parth/Study/CatClick/images/cat-4.jpg",
+    imagePath:"C:/Users/Parth/Study/CatClicker/images/cat-4.jpg",
     clickCount:0
     },
     {
     catName:"Foxy",
-    imagePath:"C:/Users/Parth/Study/CatClick/images/cat-5.jpg",
+    imagePath:"C:/Users/Parth/Study/CatClicker/images/cat-5.jpg",
     clickCount:0
     }
-  ],
-  currentCat:null
-};
+  ]);
 
-var view={
-  //var catDiv, catName, catClickCount, catPicture, listCatName;
-  init:function(){
-    this.catDiv = document.getElementById('cat-div');
-
-    this.catClickCount = document.getElementById('cat-click-count');
-    this.catPicture = document.getElementById('cat-picture');
-    this.catName = document.getElementById('cat-name');
-
-    this.catPicture.addEventListener('click', function(){
-      controller.incrementCounter();
+  // To find the cat object from catArray using catName
+  this.searchCatData = function(previousCatName){
+    return ko.utils.arrayFirst(self.catArray(), function(catt){
+      return (previousCatName === catt.catName);
     });
-    this.render();
+  };
 
-  },
-  render:function(){
-    var currentCat = controller.getCurrentCat();
-    this.catName.innerHTML = currentCat.catName;
-    this.catPicture.src = currentCat.imagePath;
-    this.catClickCount.innerHTML = currentCat.clickCount;
-  },
-  getCatPictureElem: function(){
-    return this.catPicture;
-  },
-};
+  // currentCat - main observable object of the app, initialized with cat at
+  // 0th index in the catArray
+  this.currentCat = ko.observable(new cat(this.catArray()[0]));
+  self.currentCatIndex = 0;
 
-var listView={
-  init:function(){
-    this.listCatName = document.getElementById('list-cat-name');
-    this.render();
-  },
-  render:function(){
-    var allCats = controller.getAllCats();
-    for(let i = 0; i < allCats.length; i++){
-        var newCat = document.createElement('li');
-        newCat.innerHTML = allCats[i].catName;
-        newCat.addEventListener('click', (function(catCopy){
-          return function(){
-            controller.setCurrentCat(catCopy);
-            view.render();//loophole - view to view communication
-            if(controller.isAdminVisible())
-              adminView.render();
-          };
-        })(allCats[i]));
-        this.listCatName.appendChild(newCat);
-    }
+  // To save the updated cat data in the catArray
+  this.saveCurrentCat = function(){
+    var catInArray = self.catArray()[self.currentCatIndex];
+    catInArray.clickCount = self.currentCat().clickCount();
+    catInArray.catName = self.currentCat().catName();
+    catInArray.imagePath = self.currentCat().imagePath();
   }
-};
 
+  // This needs the use of mongo, which needs require,
+  // which needs node, which uses commonJS, which needs
+  // browserify
+  this.saveCat = function(cat){
+    var catInArray = self.catArray()[self.currentCatIndex];
+    //catInArray.clickCount = cat.clickCount();
+    catInArray.catName = cat.catName();
+    catInArray.imagePath = cat.imagePath();
+  }
 
-var controller={
-  init:function(){
-    model.currentCat = model.catArray[0];
-    view.init();
-    listView.init();
-  },
-  getCurrentCat:function(){
-    return model.currentCat;
-  },
-  setCurrentCat: function(cat){
-    model.currentCat = cat;
-  },
-  getCurrentClickCount: function(){
-    return model.currentCat.clickCount;
-  },
-  incrementCounter:function(){
-    model.currentCat.clickCount++;
-    view.render();
-  },
-  getAllCats:function(){
-    return model.catArray;
-  },
-  isAdminVisible:function(){
-    return adminView.formDivVisible;
-  },
-  updateCurrentCat:function(catCopy){
-    model.currentCat = catCopy;
-    view.render();
-  },
-};
+  this.saveCurrentCatCount = function(){
+    var catInArray = self.searchCatData(self.currentCat().catName());
+    catInArray.clickCount = self.currentCat().clickCount();
+  }
 
-controller.init();
+  this.shuffleCurrentCat = function(index, clickedCat){
+    self.currentCatIndex = index;
+    // Update current cat's click count in the model
+    self.saveCurrentCatCount();
+    // Update the current cat
+    self.currentCat(new cat(clickedCat));
+  }
+
+  // Initially the form is invisible
+  this.isAdminVisible = ko.observable(false);
+
+  // Visibility of the form changes as the admin button is clicked
+  this.toggleAdminView = function(){
+    this.isAdminVisible(!this.isAdminVisible());
+  }
+}
+//ko.applyBindings(new adminViewModel());
+ko.applyBindings(new viewModel());
