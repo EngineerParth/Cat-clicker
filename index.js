@@ -64,16 +64,6 @@ function viewModel(){
     catInArray.imagePath = self.currentCat().imagePath();
   }
 
-  // This needs the use of mongo, which needs require,
-  // which needs node, which uses commonJS, which needs
-  // browserify
-  this.saveCat = function(cat){
-    var catInArray = self.catArray()[self.currentCatIndex];
-    //catInArray.clickCount = cat.clickCount();
-    catInArray.catName = cat.catName();
-    catInArray.imagePath = cat.imagePath();
-  }
-
   this.saveCurrentCatCount = function(){
     var catInArray = self.searchCatData(self.currentCat().catName());
     catInArray.clickCount = self.currentCat().clickCount();
